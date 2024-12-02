@@ -8,16 +8,31 @@
 import flask
 import datetime
 import os
+import redis
+
 # Crear el objeto que representa la aplicacion web
 APP = flask.Flask(__name__)
 nombre=os.environ['NAME']
+
+# Crear cliente para redis
+redis_location = os.environ['REDIS_LOCATION']
+redis_port = os.environ['REDIS_PORT']
+redis_client = redis.Redis(host=redis_location, port=redis_port, db=0)
+
+PREFIX = "webapp2024"
+CONTADOR_BASE_KEY = "contador_visitas"
+CONTADOR_KEY = "-".join([PREFIX, CONTADOR_BASE_KEY])
+
 
 @APP.route('/')
 def index():
     """ Muestra la página inicial asociada al recurso `/`
         y que estará contenida en el archivo index.html
     """
-    return flask.render_template('index.html', nombre=nombre,timestamp=datetime.datetime.now())
+    
+    contador_visitas = redis_client.incr(CONTADOR_KEY);
+    
+    return flask.render_template('index.html', nombre=nombre, contador_visitas=contador_visitas, timestamp=datetime.datetime.now())
 
 
 if __name__ == '__main__':

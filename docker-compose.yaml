@@ -1,4 +1,10 @@
 services:
+  redis:
+    image: redis:latest
+    networks: 
+      - web_network
+    expose: 
+      - 6379
 
   webapp:
     build: ./app
@@ -10,6 +16,8 @@ services:
     environment:
       - NAME=sergio
       - PORT=8080
+      - REDIS_LOCATION=redis
+      - REDIS_PORT=6379
     ports:
       - 80:8080
 
